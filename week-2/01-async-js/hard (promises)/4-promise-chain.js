@@ -6,19 +6,40 @@
  */
 
 function wait1(t) {
-
-}
-
-function wait2(t) {
-
-}
-
-function wait3(t) {
-
-}
-
-function calculateTime(t1, t2, t3) {
-
-}
-
-module.exports = calculateTime;
+    let prom = new Promise((resolve) => {
+      setInterval(resolve, t * 1000);
+    });
+    return prom;
+  }
+  
+  function wait2(t) {
+    let prom = new Promise((resolve) => {
+      setInterval(resolve, t * 1000);
+    });
+    return prom;
+  }
+  
+  function wait3(t) {
+    let prom = new Promise((resolve) => {
+      setInterval(resolve, t * 1000);
+    });
+    return prom;
+  }
+  
+  function calculateTime(t1, t2, t3) {
+    let start = Date.now();
+  
+  
+    return wait1(t1).then(() => {
+      return wait1(t2).then(() => {
+        return wait1(t3).then(() => {
+          return new Promise((resolve) => {
+            let timeTaken = Date.now() - start;
+            resolve(timeTaken);
+          });
+        });
+      });
+    });
+  }
+  
+  module.exports = calculateTime;
