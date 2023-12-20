@@ -39,11 +39,92 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-  const express = require('express');
-  const bodyParser = require('body-parser');
-  
-  const app = express();
-  
-  app.use(bodyParser.json());
-  
-  module.exports = app;
+const express = require("express");
+const bodyParser = require("body-parser");
+const fs = require("fs");
+const port = 3000;
+
+const app = express();
+app.use(bodyParser.json());
+
+const findIndex = (list, id) => {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].id === id) return i;
+  }
+  return -1;
+};
+
+app.get("/todos", (req, res) => {
+  fs.readFile("todos.json", "utf8", (err, data) => {
+    if (err) throw err;
+    res.status(200).json(JSON.parse(data));
+  });
+});
+
+app.get("/todos/:id", (req, res) => {
+  fs.readFile("todos.json", "utf8", (err, data) => {
+    if (err) throw err;
+    const todoList = JSON.parse(data);
+    const todoIndex = findIndex(todoList, parseInt(req.params.id));
+    if (todoIndex === -1) return res.status(404).send("Not found");
+    const currTodo = todoList[todoIndex];
+    res.status(200).json(currTodo);
+  });
+});
+
+app.post("/todos", (req, res) => {
+  const newTodo = {
+    id: Math.floor(Math.random() * 1000000),
+    title: req.body.title,
+    description: req.body.description
+  };
+  fs.readFile("todos.json", "utf8", (err, data) => {
+    if (err) throw err;
+    let todoList = JSON.parse(data);
+    todoList.push(newTodo);
+    const newTodoList = JSON.stringify(todoList);
+    fs.writeFile("todos.json", newTodoList, (err) => {
+      if (err) throw err;
+      res.status(201).json(newTodo);
+    });
+  });
+});
+
+app.put("/todos/:id", (req, res) => {
+  fs.readFile("todos.json", "utf8", (err, data) => {
+    if (err) throw err;
+    let todoList = JSON.parse(data);
+    const todoIndex = findIndex(todoList, parseInt(req.params.id));
+    if (todoIndex === -1) return res.status(404).send("Not found");
+    todoList[todoIndex].title = req.body.title;
+    todoList[todoIndex].description = req.body.description;
+    const newTodoList = JSON.stringify(todoList);
+    fs.writeFile("todos.json", newTodoList, (err) => {
+      if (err) throw err;
+      res.status(200).json(todoList[todoIndex]);
+    });
+  });
+});
+
+app.delete("/todos/:id", (req, res) => {
+  fs.readFile("todos.json", "utf8", (err, data) => {
+    if (err) throw err;
+    let todoList = JSON.parse(data);
+    const todoIndex = findIndex(todoList, parseInt(req.params.id));
+    if (todoIndex === -1) return res.status(404).send("Not found");
+    todoList = todoList.splice(todoIndex, 1);
+    const newTodoList = JSON.stringify(todoList);
+    fs.writeFile("todos.json", newTodoList, (err) => {
+      if (err) throw err;
+      res.status(200).send();
+    });
+  });
+})
+
+// app.listen(port, (req, res) => {
+//   console.log("The the app is running on port " + port);
+// });
+
+app.use(bodyParser.json());
+
+module.exports = app;
