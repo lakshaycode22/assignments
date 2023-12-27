@@ -4,6 +4,11 @@ const express = require('express');
 
 const app = express();
 let requestCount = 0;
+const counts = (req, res, next) => {
+  requestCount++;
+  next();
+}
+app.use(counts);
 
 // You have been given an express server which has a few endpoints.
 // Your task is to create a global middleware (app.use) which will

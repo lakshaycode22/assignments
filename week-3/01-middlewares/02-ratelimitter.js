@@ -9,12 +9,28 @@ const app = express();
 // should block them with a 404.
 // User will be sending in their user id in the header as 'user-id'
 // You have been given a numberOfRequestsForUser object to start off with which
-// clears every one second
+// clears every one secondx
 
 let numberOfRequestsForUser = {};
 setInterval(() => {
     numberOfRequestsForUser = {};
 }, 1000)
+
+const rateLimitter = (req, res, next) => {
+  const userId = req.header("user-id");
+  
+  if(!numberOfRequestsForUser[userId]) numberOfRequestsForUser[userId] = {requests : 0};
+
+  numberOfRequestsForUser[userId].requests++;
+
+  if( numberOfRequestsForUser[userId].requests >= 5){
+    res.status(404).send();
+    return;
+  }
+  next();
+}
+
+app.use(rateLimitter)
 
 app.get('/user', function(req, res) {
   res.status(200).json({ name: 'john' });

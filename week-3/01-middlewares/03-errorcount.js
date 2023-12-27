@@ -4,6 +4,12 @@ const express = require('express');
 
 const app = express();
 let errorCount = 0;
+const counts = (err, req, res, next) => {
+  if(err){
+    errorCount++;
+    res.status(404).send();
+  }
+}
 
 // You have been given an express server which has a few endpoints.
 // Your task is to
@@ -23,4 +29,5 @@ app.get('/errorCount', function(req, res) {
   res.status(200).json({ errorCount });
 });
 
+app.use(counts);
 module.exports = app;
